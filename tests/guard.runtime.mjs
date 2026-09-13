@@ -113,12 +113,14 @@ assert.ok(text.includes('aria2-dl.js'), 'reason names the aria2 forwarder')
 assert.ok(text.includes('https://example.com/model.bin'), 'reason echoes the URL')
 console.log('PASS blocked: curl -o denied, body skipped, aria2 command supplied')
 
-// --- the legacy hand-rolled downloader is blocked too -------------------
+// --- a filename mention reaches the body (removed rule regression) ------
+// The deleted download.cjs rule denied any command containing that text.
+// This pins that the denial is gone end to end, not just in the detector.
 bodyRuns = []
-const legacy = await dispatch('pwsh', 'node C:/x/download.cjs https://example.com/big.iso out.iso')
-assert.equal(legacy.isError, true, 'download.cjs is blocked')
-assert.equal(bodyRuns.length, 0, 'body skipped')
-console.log('PASS blocked: download.cjs denied')
+const mention = await dispatch('pwsh', "Write-Output 'download.cjs was removed'")
+assert.notEqual(mention.isError, true, 'a filename mention must not be denied')
+assert.equal(bodyRuns.length, 1, 'the body ran for a filename mention')
+console.log('PASS allowed: a bare download.cjs mention is no longer denied')
 
 // --- ordinary work passes ----------------------------------------------
 for (const ok of [

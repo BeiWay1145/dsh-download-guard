@@ -53,7 +53,6 @@ The criterion comes from the skill itself: **whether bytes are being written to 
 | `Invoke-WebRequest ... -OutFile F` | `Invoke-WebRequest https://api.x/status` |
 | `Invoke-RestMethod ... -OutFile F` | `Invoke-RestMethod https://api.x/data` |
 | `Start-BitsTransfer ...` | — |
-| `node .../download.cjs` | — |
 
 **Deliberately not blocked** (by design):
 
@@ -61,6 +60,7 @@ The criterion comes from the skill itself: **whether bytes are being written to 
 - `git clone` — git owns its own transport
 - commented-out commands (a shell never runs them)
 - non-shell tools (even when their arguments contain `curl -o`)
+- **merely mentioning a filename** (e.g. printing `download.cjs` in a log) — a former filename-matching rule was removed after it produced false positives
 
 Detection is **biased toward false negatives**: blocking an ordinary command is a visible regression, while missing a download is merely the status quo.
 

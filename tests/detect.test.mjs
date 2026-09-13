@@ -44,9 +44,14 @@ blocks('Start-BitsTransfer -Source https://x/big.zip -Destination big.zip')
 allows('Invoke-WebRequest -Uri https://api.x/status')     // prints to stdout
 allows('Invoke-RestMethod https://api.x/data')            // prints to stdout
 
-// --- the legacy hand-rolled downloader (the original bypass) ------------
-blocks('node $env:USERPROFILE\\.dsh\\plugins\\dsh-download-progress\\download.cjs <url> out.iso')
-blocks('node /home/u/.dsh/plugins/dsh-download-progress/download.cjs https://x/y C:/out/y')
+// --- a bare filename mention must NEVER block ----------------------------
+// The removed download.cjs rule matched the text anywhere in the command, so
+// these ordinary commands were denied. They are the regression pin for that
+// false positive.
+allows("Write-Output 'the old download.cjs channel is gone'")
+allows('Get-Content CHANGELOG.md   # mentions download.cjs historically')
+allows("echo 'download.cjs'")
+allows('Select-String -Pattern "download.cjs" -Path notes.md')
 
 // --- near-misses that must never be blocked -----------------------------
 allows('node scripts/build.mjs')

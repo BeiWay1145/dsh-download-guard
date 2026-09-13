@@ -17,6 +17,8 @@
  * - wget -O - (explicit stdout) — same reasoning.
  * - Package managers (pip install, npm install) — out of scope by decision:
  *   this guard covers large-file downloads only.
+ * - bare filename mentions such as "download.cjs" — removed as a rule after it
+ *   false-positived on ordinary commands that merely referenced the text.
  */
 
 /** A detection result: which pattern matched, and the URL when one is visible. */
@@ -55,12 +57,18 @@ export function detectInCommand(command: string): DownloadHit | undefined {
   const code = stripComments(command)
   if (code === '') return undefined
 
-  // --- the legacy dsh-download-progress downloader -----------------------
-  // The exact bypass that motivated this plugin: a hand-rolled
-  // single-connection node downloader that never touches aria2.
-  if (/download[.]cjs/.test(code)) {
-    return { rule: 'download.cjs', url: firstUrl(code) }
-  }
+  // NOTE: a `download.cjs` rule lived here and was REMOVED.
+  //
+  // It matched the bare filename anywhere in the command, with no anchor on an
+  // interpreter or argument position, so any occurrence of that text — inside a
+  // quoted string, a log message, a comment being echoed — was denied. That was
+  // observed in practice: an ordinary read-only command whose output happened
+  // to mention the filename was blocked.
+  //
+  // It is also moot now: the plugin that shipped the downloader was
+  // uninstalled and its script deleted, so the rule had no remaining target
+  // while carrying the highest false-positive risk of any rule here. The
+  // write-to-disk rules below cover the real cases.
 
   // --- curl -------------------------------------------------------------
   // Requires an explicit output flag: -o FILE | -O | --output FILE

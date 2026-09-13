@@ -53,7 +53,6 @@ const answer = ... this.ctx.waterfall(..., "approval/request", ...)   // ← 永
 | `Invoke-WebRequest ... -OutFile F` | `Invoke-WebRequest https://api.x/status` |
 | `Invoke-RestMethod ... -OutFile F` | `Invoke-RestMethod https://api.x/data` |
 | `Start-BitsTransfer ...` | — |
-| `node .../download.cjs` | — |
 
 **明确不拦**（按设计）：
 
@@ -61,6 +60,7 @@ const answer = ... this.ctx.waterfall(..., "approval/request", ...)   // ← 永
 - `git clone`——git 自有传输层
 - 注释行里的命令（shell 不会执行）
 - 非 shell 工具（即使参数里含 `curl -o` 字样）
+- **仅仅是提到某文件名**（例如日志里打印 `download.cjs`）——曾有一条按文件名匹配的规则，因误伤已删除
 
 检测**刻意偏向漏判而非误判**：拦截一条正常命令是可见的体验倒退，而漏掉一次下载只是现状。
 
