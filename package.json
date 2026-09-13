@@ -1,0 +1,59 @@
+{
+  "name": "dsh-download-guard",
+  "version": "0.1.0",
+  "description": "DeepSeek Harness plugin: force every large-file download through the local aria2 engine by denying shell download commands at the tool pre-execute hook. Returns the exact aria2 replacement command. 强制下载统一走 aria2 的 DSH 插件。",
+  "type": "module",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BeiWay1145/dsh-download-guard.git"
+  },
+  "homepage": "https://github.com/BeiWay1145/dsh-download-guard",
+  "bugs": {
+    "url": "https://github.com/BeiWay1145/dsh-download-guard/issues"
+  },
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "download",
+    "aria2",
+    "guard",
+    "deepseek-harness",
+    "motrix"
+  ],
+  "main": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./src/*": "./src/*",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib",
+    "src",
+    "cordis.patch.yml",
+    "README.md",
+    "README_EN.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "typecheck": "tsc --noEmit",
+    "test": "node scripts/build.mjs && node tests/detect.test.mjs && node tests/guard.runtime.mjs"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "esbuild": "^0.25.0",
+    "typescript": "^5.6.0"
+  },
+  "allowScripts": {
+    "esbuild@0.25.12": true
+  }
+}

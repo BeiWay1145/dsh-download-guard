@@ -1,0 +1,4 @@
+# dsh-download-guard bundle patch
+- insert:
+    - id: download-guard
+      name: 'dsh-download-guard'
