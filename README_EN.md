@@ -83,6 +83,43 @@ Blocked command: curl -o Win11.iso https://.../y.iso
 
 The **URL is extracted and substituted into the suggested command** — whoever was refused does not have to guess how to comply.
 
+## The bundled forwarder
+
+This package **ships** the aria2 forwarder:
+
+```
+scripts/aria2-dl.cjs
+```
+
+The path in a denial message is the **absolute path of this bundled copy**,
+resolved at runtime from `import.meta.url`.
+
+> **Why it must be bundled**: an earlier version pointed at
+> `~/.dsh/skills/aria2-download/scripts/aria2-dl.js` — a machine-private path.
+> On a machine without that skill the guard would refuse a download and then
+> name a file that does **not exist**. That is worse than not blocking: it
+> breaks the workflow and offers no way out.
+
+The script talks **JSON-RPC only** (no `aria2c.exe` needed) and requires a
+running **aria2-next** engine (bundled with Motrix Next). A missing engine is
+reported explicitly rather than failing silently.
+
+### Environment
+
+| Variable | Default | Purpose |
+|---|---|---|
+| `ARIA2_RPC_PORT` | `16800` | Engine RPC port |
+| `ARIA2_RPC_TIMEOUT_MS` | `15000` | RPC timeout |
+| `ARIA2_DOWNLOAD_DIR` | the user's `Downloads` folder | Default destination (no hardcoded drive) |
+
+### Direct use
+
+```bash
+node scripts/aria2-dl.cjs <url> --out=<name> [--dir=<dir>] [--no-wait]
+node scripts/aria2-dl.cjs --status <gid>
+node scripts/aria2-dl.cjs --list
+```
+
 ## Install
 
 ```bash

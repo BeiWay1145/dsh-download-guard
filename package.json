@@ -22,14 +22,19 @@
     "motrix"
   ],
   "main": "lib/index.js",
+  "bin": {
+    "aria2-dl": "./scripts/aria2-dl.cjs"
+  },
   "exports": {
     ".": "./lib/index.js",
     "./src/*": "./src/*",
+    "./scripts/aria2-dl.cjs": "./scripts/aria2-dl.cjs",
     "./package.json": "./package.json"
   },
   "files": [
     "lib",
     "src",
+    "scripts/aria2-dl.cjs",
     "cordis.patch.yml",
     "README.md",
     "README_EN.md",

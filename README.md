@@ -83,6 +83,36 @@ Blocked command: curl -o Win11.iso https://.../y.iso
 
 **URL 会被自动提取并填进建议命令**——被拒绝的一方不需要猜该怎么改。
 
+## 随包分发的 forwarder
+
+本插件**自带** aria2 转发脚本：
+
+```
+scripts/aria2-dl.cjs
+```
+
+拦截提示里给出的路径，就是**这个随包副本的绝对路径**（由 `import.meta.url` 在运行期解析）。
+
+> **为什么必须自带**：早期版本的提示指向 `~/.dsh/skills/aria2-download/scripts/aria2-dl.js` —— 那是一个**机器私有路径**。在没有该技能的机器上，守卫会拒绝下载、然后让用户去用一个**根本不存在**的文件。那比不拦更糟：既打断流程，又不给出路。
+
+该脚本**只走 JSON-RPC**（不依赖 `aria2c.exe`），要求本机运行 **aria2-next** 引擎（Motrix Next 内置）。引擎未启动时会明确报错，而不是静默失败。
+
+### 环境变量
+
+| 变量 | 默认 | 说明 |
+|---|---|---|
+| `ARIA2_RPC_PORT` | `16800` | 引擎 RPC 端口 |
+| `ARIA2_RPC_TIMEOUT_MS` | `15000` | RPC 超时 |
+| `ARIA2_DOWNLOAD_DIR` | 用户 `Downloads` 目录 | 默认落盘目录（**不硬编码盘符**） |
+
+### 直接使用
+
+```bash
+node scripts/aria2-dl.cjs <url> --out=<文件名> [--dir=<目录>] [--no-wait]
+node scripts/aria2-dl.cjs --status <gid>
+node scripts/aria2-dl.cjs --list
+```
+
 ## 安装
 
 ```bash

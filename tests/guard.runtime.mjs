@@ -109,9 +109,19 @@ assert.equal(blocked.isError, true, 'download is reported as an error')
 assert.equal(bodyRuns.length, 0, 'the tool body never ran')
 const text = blocked.content.map((c) => c.text).join('')
 assert.ok(text.includes('BLOCKED by dsh-download-guard'), 'reason reaches the model')
-assert.ok(text.includes('aria2-dl.js'), 'reason names the aria2 forwarder')
+assert.ok(text.includes('aria2-dl.cjs'), 'reason names the bundled forwarder')
 assert.ok(text.includes('https://example.com/model.bin'), 'reason echoes the URL')
-console.log('PASS blocked: curl -o denied, body skipped, aria2 command supplied')
+
+// The suggested command must name a file that ACTUALLY EXISTS. The guard once
+// pointed at a machine-private skill path, so on any other machine it denied a
+// download and then named a script that was not there.
+{
+  const m = /node "([^"]+aria2-dl\.cjs)"/.exec(text)
+  assert.ok(m !== null, 'the reason contains a concrete node command')
+  const suggested = m[1].replace(/\\/g, '/')
+  assert.ok(existsSync(suggested), 'the suggested forwarder exists on disk: ' + suggested)
+}
+console.log('PASS blocked: curl -o denied, body skipped, a REAL aria2 command supplied')
 
 // --- a filename mention reaches the body (removed rule regression) ------
 // The deleted download.cjs rule denied any command containing that text.

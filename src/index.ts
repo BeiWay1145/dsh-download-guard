@@ -21,14 +21,29 @@
  * Scope, by decision: large-file downloads only. Package managers (pip, npm)
  * are explicitly out of scope — neither detected nor blocked.
  */
+import { fileURLToPath } from 'node:url'
+import { dirname, join } from 'node:path'
 import { inspect } from './detect.ts'
 
 /**
- * The forwarder every blocked download is told to run instead.
- * Uses $env:USERPROFILE because the guard cannot know the absolute home path
- * at build time, and the reader is a PowerShell-capable agent.
+ * Absolute path of the forwarder BUNDLED WITH THIS PACKAGE.
+ *
+ * Earlier this was the literal `~/.dsh/skills/aria2-download/scripts/aria2-dl.js`
+ * — a machine-private path. On any machine without that skill the guard would
+ * refuse a download and then name a file that does not exist, which is worse
+ * than not blocking at all: it breaks the workflow and offers no way out.
+ *
+ * `import.meta.url` resolves to <package>/lib/index.js at runtime, so the
+ * bundled script sits one level up in scripts/.
  */
-const FORWARDER = 'node "$env:USERPROFILE\\.dsh\\skills\\aria2-download\\scripts\\aria2-dl.js"'
+function forwarderPath(): string {
+  try {
+    return join(dirname(fileURLToPath(import.meta.url)), '..', 'scripts', 'aria2-dl.cjs')
+  } catch {
+    // Never let path discovery turn a refusal into a crash.
+    return 'aria2-dl.cjs'
+  }
+}
 
 /**
  * Build the denial text: what was blocked, why, and the exact replacement
@@ -44,7 +59,7 @@ export function denialMessage(rule: string, url: string | undefined, command: st
     '(Motrix Next) so they are multithreaded, resumable and visible in the download manager.',
     '',
     'Use instead:',
-    '  ' + FORWARDER + ' "' + target + '" --out=<filename>',
+    '  node "' + forwarderPath() + '" "' + target + '" --out=<filename>',
     '',
     'Options: --dir=<dir> for the destination, --header="K: V" for headers,',
     '--no-wait to enqueue and return immediately (then query with --status <gid>).',
