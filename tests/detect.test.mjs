@@ -6,6 +6,7 @@
  * with the near-miss that must stay allowed.
  */
 import { strict as assert } from 'node:assert'
+import { readFileSync } from 'node:fs'
 import { detectInCommand, commandOf, isShellTool, inspect, firstUrl } from '../src/detect.ts'
 
 let checks = 0
@@ -83,5 +84,31 @@ assert.equal(commandOf(null), '')
 assert.equal(firstUrl('curl -o x https://example.com/a.zip'), 'https://example.com/a.zip')
 assert.equal(firstUrl('no url here'), undefined)
 checks += 5
+
+
+
+// fight the JS lexer — the cases ARE about quoting.
+
+
+// --- issue #1 regressions, loaded from JSON -------------------------------
+// These cases are ABOUT quoting (a downstream -o, an escaped quote inside a
+// pattern), and embedding them in JS source means fighting the JS lexer for
+// no benefit. The fixture keeps them readable and unambiguously quoted.
+const fixturePath = new URL('./detect.cases.json', import.meta.url)
+const fixture = JSON.parse(readFileSync(fixturePath, 'utf8'))
+
+for (const c of fixture.mustAllow) {
+  checks += 1
+  const hit = detectInCommand(c.cmd)
+  assert.equal(hit, undefined, 'must ALLOW (' + c.why + '): ' + c.cmd + ' -- got ' + JSON.stringify(hit))
+}
+console.log('PASS issue#1: ' + fixture.mustAllow.length + ' read-only commands are allowed')
+
+for (const c of fixture.mustBlock) {
+  checks += 1
+  const hit = detectInCommand(c.cmd)
+  assert.ok(hit !== undefined, 'must BLOCK (' + c.why + '): ' + c.cmd)
+}
+console.log('PASS issue#1: ' + fixture.mustBlock.length + ' real downloads are still blocked')
 
 console.log('PASS detector: ' + checks + ' checks')

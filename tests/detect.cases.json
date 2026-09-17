@@ -1,0 +1,107 @@
+{
+  "_comment": "Issue #1 regressions. JSON avoids the JS-quoting trap: these cases are ABOUT quotes, so embedding them in JS source is error-prone.",
+  "mustAllow": [
+    {
+      "why": "the reporter's exact case",
+      "cmd": "curl -s http://127.0.0.1:43120/ | grep -o \"sidebar-downloads\""
+    },
+    {
+      "why": "downstream -o in a pipe",
+      "cmd": "curl -s http://x/y | grep -o foo | head -3"
+    },
+    {
+      "why": "downstream -o after &&",
+      "cmd": "curl -s http://x/y && grep -o foo file.txt"
+    },
+    {
+      "why": "downstream -o after ;",
+      "cmd": "curl -s http://x/y; grep -o foo file.txt"
+    },
+    {
+      "why": "escaped quote must not desync the splitter",
+      "cmd": "curl -s http://x/y | grep -o \"a[^\\\"']*\" | head -5; curl -s http://x/health"
+    },
+    {
+      "why": "stdout target",
+      "cmd": "curl -s -o - http://x/f.zip | head -c 200"
+    },
+    {
+      "why": "black-hole target",
+      "cmd": "curl -s -o /dev/null -w \"%{http_code}\" http://x/api"
+    },
+    {
+      "why": "black-hole via =",
+      "cmd": "curl -s --output=/dev/null http://x/api"
+    },
+    {
+      "why": "NUL on Windows",
+      "cmd": "curl -s -o NUL http://x/api"
+    },
+    {
+      "why": "wget stdout form",
+      "cmd": "wget -O - http://x/y | head -3"
+    },
+    {
+      "why": "wget bundled short flags",
+      "cmd": "wget -qO- http://x/y"
+    },
+    {
+      "why": "pipe into wget reading stdin",
+      "cmd": "curl -s http://x/y | wget -O - -i -"
+    },
+    {
+      "why": "separator inside quotes",
+      "cmd": "grep -o \"a|b\" file.txt"
+    },
+    {
+      "why": "escaped separator",
+      "cmd": "echo a\\|b"
+    }
+  ],
+  "mustBlock": [
+    {
+      "why": "plain download",
+      "cmd": "curl -s -o out.iso http://x/f.iso"
+    },
+    {
+      "why": "download hidden after a pipe",
+      "cmd": "curl -s http://x/y | head -3 && curl -o out.iso http://x/f.iso"
+    },
+    {
+      "why": "download hidden after a semicolon",
+      "cmd": "curl -s http://x/y; curl -o out.iso http://x/f.iso"
+    },
+    {
+      "why": "download feeding a pipe",
+      "cmd": "curl -o out.iso http://x/f.iso | head -1"
+    },
+    {
+      "why": "spaced long form",
+      "cmd": "curl --output out.iso http://x/f.iso"
+    },
+    {
+      "why": "glued long form",
+      "cmd": "curl --output=out.iso http://x/f.iso"
+    },
+    {
+      "why": "bundled -sO",
+      "cmd": "curl -sO http://x/f.iso"
+    },
+    {
+      "why": "wget defaults to writing",
+      "cmd": "wget http://x/f.iso | head -3"
+    },
+    {
+      "why": "two wgets",
+      "cmd": "wget http://x/a && wget http://x/b"
+    },
+    {
+      "why": "PowerShell",
+      "cmd": "Invoke-WebRequest -Uri https://x/f.zip -OutFile f.zip"
+    },
+    {
+      "why": "BitsTransfer",
+      "cmd": "Start-BitsTransfer -Source https://x/b.zip -Destination b.zip"
+    }
+  ]
+}
